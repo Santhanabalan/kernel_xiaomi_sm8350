@@ -1728,7 +1728,6 @@ static int dwc3_probe(struct platform_device *pdev)
 	spin_lock_init(&dwc->lock);
 
 	pm_runtime_no_callbacks(dev);
-	pm_runtime_get_noresume(dev);
 	pm_runtime_set_active(dev);
 	if (dwc->enable_bus_suspend) {
 		pm_runtime_set_autosuspend_delay(dev,
@@ -1736,7 +1735,6 @@ static int dwc3_probe(struct platform_device *pdev)
 		pm_runtime_use_autosuspend(dev);
 	}
 	pm_runtime_enable(dev);
-
 	pm_runtime_forbid(dev);
 
 	ret = dwc3_alloc_event_buffers(dwc, DWC3_EVENT_BUFFERS_SIZE);
@@ -1822,15 +1820,10 @@ err3:
 	dwc3_free_scratch_buffers(dwc);
 err2:
 	dwc3_free_event_buffers(dwc);
-	pm_runtime_allow(dev);
-	pm_runtime_disable(dev);
-	pm_runtime_set_suspended(dev);
-	pm_runtime_put_noidle(dev);
 err1:
 	pm_runtime_allow(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
 
-disable_clks:
 	clk_bulk_disable_unprepare(dwc->num_clks, dwc->clks);
 assert_reset:
 	reset_control_assert(dwc->reset);
